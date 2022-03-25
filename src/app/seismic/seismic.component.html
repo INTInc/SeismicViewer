@@ -1,0 +1,32 @@
+<mat-card #card class="seismic-card"
+          [style.top.px]='top'
+          [style.left.px]='left'
+          [style.right.px]='right'
+          [style.bottom.px]='bottom'>
+  <mat-card-header style="background-color: #1d3d62">
+    <mat-card-title style="color:white;font-size: 24px">Seismic plot</mat-card-title>
+  </mat-card-header>
+
+  <div style="position:absolute;top:10px;right:15px;z-index: 100;">
+    <button  class="tool-button"  matTooltip="Zoom In"
+            (click)="zoomIn()"><i class="material-icons">zoom_in</i></button>
+    <button  class="tool-button"  matTooltip="Zoom Out"
+            (click)="zoomOut()"><i class="material-icons">zoom_out</i></button>
+    <button  class="tool-button" matTooltip="Show Auxiliary Chart"
+            (click)="toggleChartWidget(true)" [style.backgroundColor]="(chartWidget != null && chartWidget.getVisible()) ? 'grey': '#1d3d62'"><i class="material-icons">multiline_chart</i></button>
+    <button  class="tool-button"  matTooltip="Show Headers Table"
+            (click)="toggleTable()" [style.backgroundColor]="isTable ? 'grey': '#1d3d62'"><i class="material-icons">toc
+    </i></button>
+    <button  class="tool-button"  matTooltip="Show Headers Axes"
+            (click)="addRemoveHeaders()"><i class="material-icons">playlist_add</i></button>
+    <button  class="tool-button"  matTooltip="Show Properties"
+            (click)="showProperties()"><i class="material-icons">build</i></button>
+  </div>
+  <mat-card-content class="seismic-widget">
+    <div #plothost class='plothost'>
+      <canvas #plot class='plot' oncontextmenu='return false'></canvas>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+

@@ -1,0 +1,11 @@
+<mat-expansion-panel [expanded]="this._isExpanded">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      {{_processorName}}
+    </mat-panel-title>
+    <mat-panel-description>
+      {{_processorDescription}}
+    </mat-panel-description>
+  </mat-expansion-panel-header>
+  <mat-checkbox (change)="onChecked()" [(ngModel)]="_isEnabled" [ngModelOptions]="{standalone: true}"></mat-checkbox>
+</mat-expansion-panel>

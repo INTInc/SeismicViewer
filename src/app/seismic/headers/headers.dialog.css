@@ -1,0 +1,77 @@
+h3 {
+  font-size: 14px;
+}
+.property-card {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 600px;
+  /*height: 600px;*/
+  padding: 0px;
+  padding-bottom: 10px;
+}
+
+.tab-content {
+  /*min-height: 200px;*/
+  padding: 10px;
+}
+.rasterizer-tab-content {
+  min-height: 280px;
+  padding: 10px;
+}
+
+.header-icon {
+  background: white;
+  background-size: cover;
+}
+
+.property-header {
+  background: #144e90;
+  padding: 10px;
+}
+
+.property-pane {
+  background: white;
+  padding: 10px;
+  min-height: 400px;
+  max-height: 400px;
+}
+
+.property-actions {
+  padding: 10px;
+  margin-right: 10px;
+}
+
+button {
+  float: right;
+}
+
+.md-primary {
+  background: #144e90!important;
+  color: #FFF!important;
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 36px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+
+  /* Support for all WebKit browsers. */
+  -webkit-font-smoothing: antialiased;
+  /* Support for Safari and Chrome. */
+  text-rendering: optimizeLegibility;
+
+  /* Support for Firefox. */
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Support for IE. */
+  font-feature-settings: 'liga';
+}

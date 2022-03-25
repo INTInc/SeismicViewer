@@ -1,0 +1,119 @@
+<mat-card class="property-card"
+          [style.top.px]='top'
+          [style.left.px]='left'>
+  <mat-card-header class="property-header"  (mousedown)='onMouseDown($event)'>
+    <div mat-card-avatar class="example-header-image"></div>
+    <mat-card-title>Seismic</mat-card-title>
+    <mat-card-subtitle>Properties</mat-card-subtitle>
+  </mat-card-header>
+
+
+  <mat-card-content class="property-pane">
+    <mat-tab-group class="demo-tab-group" (selectedTabChange)="tabChange($event)">
+      <mat-tab label="Scale">
+        <div class="tab-content">
+          <form class="property-form">
+            <div style="width:50%;float:left">
+            <h3>Scaling</h3>
+            <mat-form-field class="property-input" floatLabel="always">
+              <input [(ngModel)]="tracesPerInch" [ngModelOptions]="{standalone: true}" matInput placeholder="Traces per inch">
+            </mat-form-field>
+            <br/>
+            <mat-form-field class="property-input" floatLabel="always">
+              <input [(ngModel)]="inchesPerSecond" [ngModelOptions]="{standalone: true}" matInput placeholder="Inches per second">
+            </mat-form-field>
+
+            <h3>Interpolation</h3>
+              <mat-form-field class="property-input" floatLabel="always">
+                <mat-select [(ngModel)]="interpolationType" [ngModelOptions]="{standalone: true}">
+                  <mat-option [value]="1">Linear</mat-option>
+                  <mat-option [value]="2">Quadratic</mat-option>
+                  <mat-option [value]="3">Step</mat-option>
+                  <mat-option [value]="4">Centered Step</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div style="width:50%;float:left">
+              <h3>Normalization</h3>
+              <mat-form-field class="property-input" floatLabel="always">
+                <mat-select [(ngModel)]="normalizationType" [ngModelOptions]="{standalone: true}">
+                  <mat-option [value]="1">Maximum</mat-option>
+                  <mat-option [value]="3">Average</mat-option>
+                  <mat-option [value]="5">RMS</mat-option>
+                  <mat-option [value]="7">Limits</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <br/>
+              <mat-form-field class="property-input" floatLabel="always">
+                <input matInput placeholder="Scale" [(ngModel)]="scale" [ngModelOptions]="{standalone: true}" >
+              </mat-form-field>
+              <br/>
+              <mat-form-field class="property-input" floatLabel="always">
+                <input matInput placeholder="Minimum Limit" [(ngModel)]="minLimit" [ngModelOptions]="{standalone: true}" [disabled]="isNormalizationLimits() == false" >
+              </mat-form-field>
+              <br/>
+              <mat-form-field class="property-input" floatLabel="always">
+                <input matInput placeholder="Maximum Limit" [(ngModel)]="maxLimit" [ngModelOptions]="{standalone: true}" [disabled]="isNormalizationLimits() == false" >
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Rasterizer">
+        <div class="rasterizer-tab-content">
+          <form class="property-form">
+
+            <div style="width:50%;float:left">
+              <h3>Plot Type</h3>
+              <mat-checkbox [(ngModel)]="isWiggle" [ngModelOptions]="{standalone: true}">Wiggle Trace</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isNegativeFill" [ngModelOptions]="{standalone: true}">Negative Fill</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isPositiveFill" [ngModelOptions]="{standalone: true}">Positive Fill</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isNegativeColorFill" [ngModelOptions]="{standalone: true}">Negative Color Fill</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isPositiveColorFill" [ngModelOptions]="{standalone: true}">Positive Color Fill</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isSimpleDensity" [ngModelOptions]="{standalone: true}">Variable Density</mat-checkbox> <br/>
+              <mat-checkbox [(ngModel)]="isInterpolatedDensity" [ngModelOptions]="{standalone: true}">Interpolated Density</mat-checkbox> <br/>
+            </div>
+            <div style="width:50%;float:left">
+              <h3>Wiggle</h3>
+              <mat-form-field class="property-input" floatLabel="always">
+                <input #firstIndex matInput placeholder="Clipping Factor" [(ngModel)]="clippingFactor" [ngModelOptions]="{standalone: true}">
+              </mat-form-field>
+              <br/>
+              <mat-form-field class="property-input" floatLabel="always">
+                <input #firstIndex matInput placeholder="Decimation Spacing" [(ngModel)]="decimationSpacing" [ngModelOptions]="{standalone: true}">
+              </mat-form-field>
+              <br/>
+
+              <div class="color-map">
+                <mat-form-field class="property-input" floatLabel="always">
+                  <mat-select id="color-map-select" placeholder="Color Map"  [(ngModel)]="selectedColormap" [ngModelOptions]="{standalone: true}" (change)="onColorMapChanged($event)">
+                    <mat-option *ngFor="let colormap of availableColorMaps" [value]="colormap.name">
+                      <img with="140" height="10" src="{{colormap.URL}}">
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <img with="150" height="10" src="{{selectedColormap_URL}}" style="transform: translate(0px, -40px);">
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Processors">
+        <div style="max-height: 360px" *ngIf="selectedTabIndex == 2">
+          <mat-accordion>
+            <app-seismic-processor-properties *ngFor="let processor of processors" [processor]="processor"></app-seismic-processor-properties>
+          </mat-accordion>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  </mat-card-content>
+  <mat-card-actions class="property-actions">
+    <button mat-button (click)="apply()" class="md-raised md-primary">Apply</button>
+    <button mat-button (click)="close()" class="md-raised md-warn">Close</button>
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "assets/css/jquery-ui.min.css";
+@import "assets/css/jquery.colorpicker.css";
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import "assets/css/application.css";
+
+
+
+.mat-tab-group.mat-primary .mat-tab-label:not(.mat-tab-disabled):focus, .mat-tab-group.mat-primary .mat-tab-link:not(.mat-tab-disabled):focus, .mat-tab-nav-bar.mat-primary .mat-tab-label:not(.mat-tab-disabled):focus, .mat-tab-nav-bar.mat-primary .mat-tab-link:not(.mat-tab-disabled):focus{
+  background-color: rgba(11, 62,111, 0.15);
+}
+.mat-tab-group.mat-primary .mat-ink-bar, .mat-tab-nav-bar.mat-primary .mat-ink-bar {
+  background-color: #0b3e6f;
+}

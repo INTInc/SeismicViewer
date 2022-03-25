@@ -1,0 +1,7 @@
+<!--<button #colorPicker type="button" (click)="this.toggleDialog($event)" class="btn" [style.background]="initialColor"></button>-->
+<!--<input #colorPicker type="hidden" class="cp-hidden-input" [attr.value]="initialColor"/>
+<button #colorPickerButton (click)="this.toggleDialog($event)" class="btn" [style.background]="initialColor" style="border: 1px gray solid" [disabled]="isDisabled">&nbsp;</button>-->
+
+<mat-form-field class="property-input" floatLabel="always">
+  <input #colorPicker matInput placeholder="Color" (click)="this.toggleDialog($event)" [style.background]="initialColor" style="border: 1px gray solid" [disabled]="isDisabled">
+</mat-form-field>

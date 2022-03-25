@@ -1,0 +1,39 @@
+<mat-card class="property-card"
+          [style.top.px]='top'
+          [style.left.px]='left'>
+  <mat-card-header class="property-header"  (mousedown)='onMouseDown($event)'>
+    <div mat-card-avatar class="header-icon">
+      <i class="material-icons">multiline_chart</i>
+    </div>
+    <mat-card-title>Header properties</mat-card-title>
+    <mat-card-subtitle>List of available headers</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="property-pane">
+    <mat-tab-group #headersGroup class="demo-tab-group" (selectedTabChange)="tabChange($event)">
+      <mat-tab label="Auxiliary Chart">
+        <div class="tab-content" style="overflow:scroll;max-height: 360px">
+          <form class="property-form">
+            <mat-accordion>
+              <app-header-properties *ngFor="let header of auxiliaryHeaders" [header]="header"></app-header-properties>
+            </mat-accordion>
+          </form>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Header Axises">
+        <div class="tab-content" style="overflow:scroll;max-height: 360px" *ngIf="selectedTabIndex == 1">
+            <mat-accordion>
+              <app-header-properties *ngFor="let header of axisHeaders" [header]="header" default-color="gray"></app-header-properties>
+            </mat-accordion>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+  </mat-card-content>
+  <mat-card-actions class="property-actions">
+    <button mat-button (click)="apply()" class="md-raised md-primary">Apply</button>
+    <button mat-button (click)="close()" class="md-raised md-warn">Close</button>
+  </mat-card-actions>
+</mat-card>
