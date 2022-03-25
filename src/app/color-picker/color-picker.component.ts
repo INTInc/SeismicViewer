@@ -9,8 +9,8 @@ import {ChangeDetectionStrategy, ElementRef, Input, Output, ViewChild, AfterView
 })
 export class ColorPickerComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('colorPicker') colorPicker: ElementRef;
-    @ViewChild('colorPickerButton') colorPickerButton: ElementRef;
+    @ViewChild('colorPicker', { static: true }) colorPicker: ElementRef;
+    @ViewChild('colorPickerButton', { static: true }) colorPickerButton: ElementRef;
 
     @Input('initialColor') initialColor: string;
     @Input('isDisabled') isDisabled = false;

@@ -216,7 +216,7 @@ export class AuxiliaryChart extends AnnotatedWidget {
 
       let crossHairTool = this.getToolByName('cross-hair');
       if (crossHairTool != null) {
-        crossHairTool.setName('crosshair');
+        crossHairTool.setName('cross-hair');
       }
 
       this.connect(this._axis_south, this._chartModel);

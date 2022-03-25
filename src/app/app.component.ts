@@ -17,8 +17,8 @@ import {WindowService} from "./window.service";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, AfterViewInit {
-  @ViewChild('container') container: ElementRef;
-  @ViewChild(SeismicComponent) seismic: SeismicComponent;
+  @ViewChild('container', { static: false }) container: ElementRef;
+  @ViewChild(SeismicComponent, { static: true }) seismic: SeismicComponent;
   public _onCloseDialog: any;
 
   public _windowService: WindowService;
@@ -43,25 +43,20 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (component != null) {
           const options = args['options'];
           this.attachToComponent(component, this.seismic.getPipeline(), options);
-        } else {
-          this.seismic.deleteArea(area);
         }
-      } else {
-        this.seismic.deleteArea(area);
       }
     }.bind(this);
   }
-
   ngOnInit() {
   }
 
   ngAfterViewInit() {
     this._windowService.setMainComponent(this.seismic);
+    this.seismic.setWindowService(this._windowService);
   }
 
   public attachToComponent (component, pipeline, options) {
     component.addArea(pipeline, options);
     return this;
   }
-
 }

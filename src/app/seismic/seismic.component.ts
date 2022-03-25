@@ -34,6 +34,7 @@ import { AuxiliaryChart } from './auxiliarychart';
 import { IWindow, WindowService } from "../window.service";
 import { SeismicProperties } from "./seismic.properties";
 import { HeadersDialog } from "./headers/headers.dialog";
+import { AnnotationLocation } from "@int/geotoolkit/layout/AnnotationLocation";
 
 init({
   'imports': [
@@ -50,16 +51,16 @@ init({
   styleUrls: ['./seismic.component.css']
 })
 export class SeismicComponent extends EventDispatcher implements IWindow, OnInit, AfterViewInit {
-  @ViewChild('card') card: ElementRef;
-  @ViewChild('plot') canvas: ElementRef;
-  @ViewChild('plothost') plotHost: ElementRef;
+  @ViewChild('card', { static: false }) card: ElementRef;
+  @ViewChild('plot', { static: false }) canvas: ElementRef;
+  @ViewChild('plothost', { static: false }) plotHost: ElementRef;
   @Input('left') left: number;
   @Input('top') top: number;
   @Input('right') right: number;
   @Input('bottom') bottom: number;
 
   @Input('isTable') isTable: boolean;
-  
+
   public _windowService: WindowService;
   public _onCloseDialog: any;
   public pipeline: SeismicPipeline;
@@ -78,43 +79,10 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     super();
   }
 
-  ngOnInit() {
-    
-  }
-
-  ngAfterViewInit() {
-    this.createReader(function (reader) {
-      this.initializePlot(reader);
-      this.updateState();
-    }.bind(this), function () { });
-
-    this.resize(null);
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event) {
-    this.resize(event);
-  }
-
-  setWindowService(windowService: WindowService): SeismicComponent {
-    this._windowService = windowService;
-    return this;
-  }
-
-  public setLayout(layout) {
-    if (layout.hasOwnProperty('left')) this.left = layout['left'];
-    if (layout.hasOwnProperty('top')) this.top = layout['top'];
-    if (layout.hasOwnProperty('right')) this.right = layout['right'];
-    if (layout.hasOwnProperty('bottom')) this.bottom = layout['bottom'];
-
-    setTimeout(() => { this.resize(); }, 100);
-    return this;
-  }
-
   public static createPipeline(reader): SeismicPipeline {
     const pipeline = new SeismicPipeline({
-      'name': 'Seismic', 
-      'reader': reader, 
+      'name': 'Seismic',
+      'reader': reader,
       'statistics': reader.getStatistics()
     })
       .setOptions({
@@ -134,15 +102,14 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
           'colorMap': SeismicColors.getDefault().createNamedColorMap('WhiteBlack', 256)
         }
       })
-      //.addTraceProcessor(new geotoolkit.seismic.analysis.filters.TaperFilterProcess({'apply': false, 'name': 'TaperFilter'}))
       .addTraceProcessor(new AGC({ 'apply': true, 'name': 'AGC' }))
       .addTraceProcessor(new Reverse({ 'apply': false, 'name': 'Reverse' }));
     return pipeline;
   }
 
   public static createSectionQuery(position, key, oppositeKey) {
-    if (key.key == 'TraceNumber') {
-      //2D seismic does not need the query
+    if (key.key === 'TraceNumber') {
+      // 2D seismic does not need the query
       return {
         'workflow': 'HaarWavelets U',
         'error': 2,
@@ -179,7 +146,45 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       }
     };
   }
+  ngOnInit() {
+  }
 
+  ngAfterViewInit() {
+    this.createReader((reader) => {
+      this.initializePlot(reader);
+      this.updateState();
+    }, () => { });
+
+    this.resize(null);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    this.resize(event);
+  }
+
+  setWindowService(windowService: WindowService): SeismicComponent {
+    this._windowService = windowService;
+    return this;
+  }
+
+  public setLayout(layout) {
+    if (layout.hasOwnProperty('left')) {
+      this.left = layout['left'];
+    }
+    if (layout.hasOwnProperty('top')) {
+      this.top = layout['top'];
+    }
+    if (layout.hasOwnProperty('right')) {
+      this.right = layout['right'];
+    }
+    if (layout.hasOwnProperty('bottom')) {
+      this.bottom = layout['bottom'];
+    }
+
+    setTimeout(() => { this.resize(); }, 100);
+    return this;
+  }
   public createReader(onready, onfailure) {
     const host = 'https://demo.int.com/INTGeoServer/json';
     const data = new RemoteSeismicDataSource({
@@ -246,11 +251,11 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     // init tools container to support interactions with widget
     this.initializeCrossHairCursor(this.seismicWidget, this.chartWidget);
 
-    this._onActiveStateListener = function (sender, eventArgs) {
-      const seismicCrossHair = this.seismicWidget.getToolByName('crosshair');
+    this._onActiveStateListener = (sender, eventArgs) => {
+      const seismicCrossHair = this.seismicWidget.getToolByName('cross-hair');
       seismicCrossHair.setEnabled(true);
-    }.bind(this);
-    
+    };
+
     this._toolsContainer = new ToolsContainer(this.plot)
       .add([
         this.chartWidget.getTool(),
@@ -280,7 +285,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
 
   public getPipeline(): SeismicPipeline {
     return this.pipeline;
-  };
+  }
 
   public initializeCrossHairCursor(seismicWidget, chartWidget) {
     // customize widget tools
@@ -292,10 +297,10 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
         y: true
       }
     });
-    const seismicCrossHair = seismicWidget.getToolByName('crosshair')
+    const seismicCrossHair = seismicWidget.getToolByName('cross-hair')
       .setVerticalLineStyle(lineStyle)
       .setHorizontalLineStyle(null);
-    const chartCrossHair = chartWidget.getToolByName('crosshair')
+    const chartCrossHair = chartWidget.getToolByName('cross-hair')
       .setVerticalLineStyle(lineStyle)
       .setHorizontalLineStyle(null);
 
@@ -321,9 +326,11 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     chartCrossHair.addListener(Events__geo__1.onPositionChanged, onPositionChanged);
   }
   public toggleChartWidget(addDefaultChart: boolean) {
-    if (this.chartWidget == null) return this;
+    if (this.chartWidget == null) {
+      return this;
+    }
     this.chartWidget.setVisible(!this.chartWidget.getVisible());
-    if (addDefaultChart && this.chartWidget.getHeadersCount() == 0) {
+    if (addDefaultChart && this.chartWidget.getHeadersCount() === 0) {
       this.chartWidget.addHeader('CDP', {
         'collectstatistics': true,
         'axis': {
@@ -333,7 +340,6 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
           'linestyle': new LineStyle('#205193')
         }
       });
-      //this.synchronizer.synchronize(this.seismicWidget.getModel(), geotoolkit.widgets.sync.SyncMode.VisibleRange);
     }
     return this;
   }
@@ -344,7 +350,8 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
   }
 
   public createSeismicWidget(pipeline: SeismicPipeline): SeismicWidget {
-    const widget = new SeismicWidget(pipeline, {
+    const widget = new SeismicWidget({
+      'pipeline': pipeline,
       'table': {
         'size': 200,
         'visible': false
@@ -395,7 +402,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const activeHeaders = this.seismicWidget.getTraceHeaders();
     const findHeader = function (headerName) {
       for (let i = 0; i < axisHeaders.length; i++) {
-        if (axisHeaders[i]['name'] == headerName) {
+        if (axisHeaders[i]['name'] === headerName) {
           return axisHeaders[i];
         }
       }
@@ -408,11 +415,11 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       if (activeHeaders.indexOf(axisHeaders[i]['name']) == -1) {
         this.seismicWidget.setTraceHeaderVisible(headerField, true);
       }
-      let headerInfo = this.seismicWidget.getTraceHeaderAxis(headerField);
+      const headerInfo = this.seismicWidget.getTraceHeaderAxis(headerField);
       if (headerInfo) {
-        let color = axisHeaders[i]['color'];
-        let lineStyle = LineStyle.fromObject(color);
-        let textStyle = TextStyle.fromObject(color);
+        const color = axisHeaders[i]['color'];
+        const lineStyle = LineStyle.fromObject(color);
+        const textStyle = TextStyle.fromObject(color);
         headerInfo['label'].setTextStyle(textStyle);
         headerInfo['axis']
           .getTickGenerator()
@@ -428,7 +435,6 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
         this.seismicWidget.setTraceHeaderVisible(headerField, false);
       }
     }
-    //this.seismicWidget.invalidate();
     return this;
   }
 
@@ -437,13 +443,13 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
 
     const axisHeaders = {};
     for (let i = 0; i < availableHeaders.length; i++) {
-      let header = availableHeaders[i];
+      const header = availableHeaders[i];
 
-      let headerInfo = this.seismicWidget.getTraceHeaderAxis(header);
+      const headerInfo = this.seismicWidget.getTraceHeaderAxis(header);
       if (headerInfo) {
         axisHeaders[header.getName()] = {
           'color': headerInfo['label'].getTextStyle().getColor()
-        }
+        };
       }
     }
 
@@ -453,24 +459,25 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       'axis-headers': axisHeaders
     };
 
-    this._onCloseDialog = function (type, dialog, args) {
+    this._onCloseDialog =  (type, dialog, args) => {
       dialog.off(WindowService.Events.onClose, this._onCloseDialog);
-      if (args == null) return;
+      if (args == null) {
+        return;
+      }
       if (args['auxiliary-headers'] != null) {
-        if (this.chartWidget.getVisible() == false && args['auxiliary-headers'].length > 0) {
+        if (this.chartWidget.getVisible() === false && args['auxiliary-headers'].length > 0) {
           this.toggleChartWidget(false);
         }
-        this.chartWidget.setChartOptions(args['auxiliary-headers'])
-
-        var westAnnotationWidth = this.chartWidget.getAnnotation('west').getDesiredWidth();
+        this.chartWidget.setChartOptions(args['auxiliary-headers']);
+        const westAnnotationWidth = this.chartWidget.getAnnotation(AnnotationLocation.West).getDesiredWidth();
         this.seismicWidget.setAnnotationSize({ 'west': westAnnotationWidth });
       }
       if (args['axis-headers'] != null) {
         this.setActiveHeaders(args['axis-headers']);
       }
-    }.bind(this);
+    };
 
-    let headersDialog = WindowService.getInstance().showDialog(HeadersDialog);
+    const headersDialog = WindowService.getInstance().showDialog(HeadersDialog);
     if (headersDialog.instance) {
       (headersDialog.instance)
         .setOptions(headersOptions)
@@ -480,7 +487,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
   }
 
   public showProperties(): SeismicComponent {
-    this._onCloseDialog = function (type, dialog, args) {
+    this._onCloseDialog = (type, dialog, args) => {
       dialog.off(WindowService.Events.onClose, this._onCloseDialog);
       if (args != null && args['options'] != null) {
         const seismicOptions = args['options'];
@@ -490,10 +497,10 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
         const processors = args['processors'];
         let processorsHasBeenChanged = false;
         for (let i = 0; i < processors.length; i++) {
-          let processorInfo = processors[i];
-          for (var j = 0; j < pipeline.getTraceProcessorsCount(); j++) {
-            let processor = pipeline.getTraceProcessor(j);
-            if (processor.getName() == processorInfo['name'] && processor.isApplicable() != processorInfo['isEnabled']) {
+          const processorInfo = processors[i];
+          for (let j = 0; j < pipeline.getTraceProcessorsCount(); j++) {
+            const processor = pipeline.getTraceProcessor(j);
+            if (processor.getName() === processorInfo['name'] && processor.isApplicable() !== processorInfo['isEnabled']) {
               processor.apply(processorInfo['isEnabled']);
               processorsHasBeenChanged = true;
               break;
@@ -511,9 +518,9 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
           pipeline.refresh();
         }
       }
-    }.bind(this);
+    };
 
-    let seismicProperties = this._windowService.showDialog(SeismicProperties);
+    const seismicProperties = this._windowService.showDialog(SeismicProperties);
     if (seismicProperties.instance) {
       const pipeline = this.seismicWidget.getPipeline();
       const seismicOptions = pipeline.getOptions();
@@ -521,12 +528,12 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
 
       const processors = [];
       for (let i = 0; i < pipeline.getTraceProcessorsCount(); i++) {
-        let processor = pipeline.getTraceProcessor(i);
+        const processor = pipeline.getTraceProcessor(i);
         processors.push({
           'name': processor.getName(),
           'description': '',
           'isEnabled': processor.isApplicable()
-        })
+        });
       }
 
       (seismicProperties.instance)
@@ -546,7 +553,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     return this;
   }
   public updateState() {
-    const isTableVisible = this.seismicWidget.getOptions()['table']['visible'] == true;
+    const isTableVisible = this.seismicWidget.getOptions()['table']['visible'] === true;
     this.isTable = isTableVisible;
     return this;
   }

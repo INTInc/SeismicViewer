@@ -16,7 +16,7 @@ let HeadersDialog_LAYOUT = {
 })
 
 export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, AfterViewInit {
-  @ViewChild('headersGroup') headersGroup: ElementRef;
+  @ViewChild('headersGroup', { static: false }) headersGroup: ElementRef;
 
   @Input('left') left: number;
   @Input('top') top: number;

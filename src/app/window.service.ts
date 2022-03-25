@@ -50,16 +50,14 @@ export class WindowService {
   }
   static Events = Events;
 
-  static getInstance():WindowService {
+  static getInstance(): WindowService {
     return WindowServiceInstance;
   }
 
   public lock() {
-    this._seismicComponent.setEnabled(false);
     return this;
   }
   public unlock() {
-    this._seismicComponent.setEnabled(true);
     return this;
   }
 
@@ -70,15 +68,16 @@ export class WindowService {
 
   public removeComponent(componentInstance: any) {
     const component = this.findComponentByInstance(componentInstance);
-    if (component == null) return this;
-
+    if (component == null) {
+      return this;
+    }
     this.removeComponentFromLayout(componentInstance);
 
     this.appRef.detachView(component.component.hostView);
     component.component.destroy();
 
     this._chartComponents[component.type] = null;
-    let index = this._chartComponents.indexOf(component);
+    const index = this._chartComponents.indexOf(component);
     this._chartComponents.splice(index, 1);
 
     return this;
@@ -88,7 +87,6 @@ export class WindowService {
     const component = this.appendComponentToBody(componentType);
     (component.instance as IWindow).setWindowService(this);
 
-    //TODO create simple layout manager
     this.attachComponentToLayout(component);
     this._chartComponentsByType[componentType] = component.instance;
     this._chartComponents.push({
@@ -100,7 +98,6 @@ export class WindowService {
   }
 
   public attachComponentToLayout (component) {
-    //TODO - move to Window Service
     this._seismicComponent.setLayout({
       'right': 610
     });
