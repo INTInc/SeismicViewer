@@ -4,7 +4,6 @@ import { EventDispatcher } from '@int/geotoolkit/util/EventDispatcher';
 import { SeismicPipeline } from '@int/geotoolkit/seismic/pipeline/SeismicPipeline';
 import { Plot } from '@int/geotoolkit/plot/Plot';
 import { SeismicWidget } from '@int/geotoolkit/seismic/widgets/SeismicWidget';
-import { ViewSynchronizer } from '@int/geotoolkit/widgets/sync/ViewSynchronizer';
 import { ToolsContainer } from '@int/geotoolkit/controls/tools/ToolsContainer';
 import { NormalizationType } from '@int/geotoolkit/seismic/pipeline/NormalizationType';
 import { Range } from '@int/geotoolkit/util/Range';
@@ -13,16 +12,12 @@ import { AGC } from '@int/geotoolkit/seismic/pipeline/processor/AGC';
 import { Reverse } from '@int/geotoolkit/seismic/pipeline/processor/Reverse';
 import { RemoteSeismicDataSource } from '@int/geotoolkit/seismic/data/RemoteSeismicDataSource';
 import { Group } from '@int/geotoolkit/scene/Group';
-import {Events as NodeEvents} from '@int/geotoolkit/scene/Node';
 import { VerticalBoxLayout } from '@int/geotoolkit/layout/VerticalBoxLayout';
 import { Alignment } from '@int/geotoolkit/layout/BoxLayout';
 import { Text } from '@int/geotoolkit/scene/shapes/Text';
-import { Events as Events__geo__ } from '@int/geotoolkit/layout/Events';
-import { Events as Events__geo__0 } from '@int/geotoolkit/controls/tools/AbstractTool';
-import { SyncMode } from '@int/geotoolkit/widgets/sync/SyncMode';
+import { Events as LayoutEvents } from '@int/geotoolkit/layout/Events';
 import { LineStyle } from '@int/geotoolkit/attributes/LineStyle';
-import { Point } from '@int/geotoolkit/util/Point';
-import { Events as Events__geo__1 } from '@int/geotoolkit/controls/tools/CrossHair';
+import { Events as CrossHairEvents } from '@int/geotoolkit/controls/tools/CrossHair';
 import { ColorBarLocation } from '@int/geotoolkit/controls/shapes/ColorBarLocation';
 import { TextStyle } from '@int/geotoolkit/attributes/TextStyle';
 import {JSLoader as JSCompression} from '@int/geotoolkit/seismic/data/compression/JSLoader';
@@ -30,11 +25,9 @@ import {WasmLoader as WasmCompression} from '@int/geotoolkit/seismic/data/compre
 import {JSLoader as JSFilters} from '@int/geotoolkit/seismic/analysis/filters/JSLoader';
 import {WasmLoader as WasmFilters} from '@int/geotoolkit/seismic/analysis/filters/WasmLoader';
 import { Component, AfterViewInit, ViewChild, ElementRef, HostListener, OnInit, Input } from '@angular/core';
-import { AuxiliaryChart } from './auxiliarychart';
 import { IWindow, WindowService } from '../window.service';
 import { SeismicProperties } from './seismic.properties';
 import { HeadersDialog } from './headers/headers.dialog';
-import { AnnotationLocation } from '@int/geotoolkit/layout/AnnotationLocation';
 
 init({
   'imports': [
@@ -66,15 +59,12 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
   public pipeline: SeismicPipeline;
   public plot: Plot;
   public seismicWidget: SeismicWidget;
-  public chartWidget: AuxiliaryChart;
-  public synchronizer: ViewSynchronizer;
-
   public _toolsContainer: ToolsContainer;
 
   public _onActiveStateListener: any;
   public _onCreateArea: any;
   public _onAreaCreated: any;
-
+  private _charts: [];
   constructor() {
     super();
   }
@@ -231,12 +221,6 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
           }).setLayoutStyle({
             'height': 20
           }),
-          // Create a seismic chart widget and customize data series to display trace headers
-          this.chartWidget = this.createChartWidget(this.pipeline)
-            .setLayoutStyle({
-              'height': GraphHeight
-            })// as AuxiliaryChart,
-            .setVisible(false) as AuxiliaryChart,
           // create seismic
           this.seismicWidget = this.createSeismicWidget(this.pipeline)
         ]),
@@ -246,10 +230,10 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       'name': 'CDP',
       'color': 'gray'
     }]);
-    this.seismicWidget.on(Events__geo__.LayoutInvalidated, this.updateState.bind(this));
+    this.seismicWidget.on(LayoutEvents.LayoutInvalidated, this.updateState.bind(this));
 
     // init tools container to support interactions with widget
-    this.initializeCrossHairCursor(this.seismicWidget, this.chartWidget);
+    this.initializeCrossHairCursor(this.seismicWidget);
 
     this._onActiveStateListener = (sender, eventArgs) => {
       const seismicCrossHair = this.seismicWidget.getToolByName('cross-hair');
@@ -258,27 +242,8 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
 
     this._toolsContainer = new ToolsContainer(this.plot)
       .add([
-        this.chartWidget.getTool(),
         this.seismicWidget.getTool()
       ]);
-
-
-    // init view synchronizer
-    // geotoolkit.widgets.sync.SyncMode.VisibleRange
-    this.synchronizer = new ViewSynchronizer({ 'mode': [SyncMode.VisibleRange] })
-      .connect(this.chartWidget, {
-        'horizontal': true,
-        'vertical': false,
-        'ignoreModelLimits': true // visible limits will not be intersected with model limits
-      })
-      .connect(this.seismicWidget, {
-        'horizontal': true,
-        'vertical': false,
-        'ignoreModelLimits': true, // visible limits will not be intersected with model limits
-        'events': [NodeEvents.VisibleLimitsChanged]
-      });
-    this.synchronizer.synchronize(this.seismicWidget.getModel(), SyncMode.VisibleRange);
-
     this.plot.setSize(this.plotHost.nativeElement.clientWidth, this.plotHost.nativeElement.clientHeight);
     return this;
   }
@@ -287,7 +252,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     return this.pipeline;
   }
 
-  public initializeCrossHairCursor(seismicWidget, chartWidget) {
+  public initializeCrossHairCursor(seismicWidget) {
     // customize widget tools
     const lineStyle = new LineStyle({
       color: 'red',
@@ -300,53 +265,37 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const seismicCrossHair = seismicWidget.getToolByName('cross-hair')
       .setVerticalLineStyle(lineStyle)
       .setHorizontalLineStyle(null);
-    const chartCrossHair = chartWidget.getToolByName('cross-hair')
-      .setVerticalLineStyle(lineStyle)
-      .setHorizontalLineStyle(null);
 
     const onPositionChanged = function (sender, eventArgs) {
       const position = eventArgs.getPosition().getX();
       if (isNaN(position)) {
         seismicCrossHair.setVisible(false);
-        chartCrossHair.setVisible(false);
         return;
       }
       seismicCrossHair.setVisible(true);
-      chartCrossHair.setVisible(true);
-      const oppositeCrossHair = sender === seismicCrossHair ? chartCrossHair : seismicCrossHair;
-      if (oppositeCrossHair.getPosition().getX() !== position) {
-        oppositeCrossHair
-          .setVisible(true)
-          .setPosition(new Point(position, 0), sender !== chartCrossHair);
-        sender.setHorizontalLineStyle(lineStyle);
-        oppositeCrossHair.setHorizontalLineStyle(null);
-      }
     };
-    seismicCrossHair.addListener(Events__geo__1.onPositionChanged, onPositionChanged);
-    chartCrossHair.addListener(Events__geo__1.onPositionChanged, onPositionChanged);
+    seismicCrossHair.addListener(CrossHairEvents.onPositionChanged, onPositionChanged);
+  }
+  public isChartVisible() {
+    return this.seismicWidget && this.seismicWidget.getOptions()['auxiliarychart']['visible'] === true;
   }
   public toggleChartWidget(addDefaultChart: boolean) {
-    if (this.chartWidget == null) {
-      return this;
-    }
-    this.chartWidget.setVisible(!this.chartWidget.getVisible());
-    if (addDefaultChart && this.chartWidget.getHeadersCount() === 0) {
-      this.chartWidget.addHeader('CDP', {
-        'collectstatistics': true,
-        'axis': {
-          'linestyle': new LineStyle('#205193')
-        },
-        'chart': {
-          'linestyle': new LineStyle('#205193')
-        }
+    const isChartVisible = this.seismicWidget.getOptions()['auxiliarychart']['visible'] === true;
+    const charts = this.seismicWidget.getOptions()['auxiliarychart']['charts'];
+    if (charts.length === 0) {
+      charts.push({
+        'visible': true,
+        'name': 'CDP',
+        'linestyle': new LineStyle('#205193')
       });
     }
+    this.seismicWidget.setOptions({
+      'auxiliarychart': {
+          'visible': !isChartVisible,
+          'charts': charts
+      }
+    });
     return this;
-  }
-
-  public createChartWidget(pipeline: SeismicPipeline): AuxiliaryChart {
-    return new AuxiliaryChart(pipeline)
-      .setAnnotationSize({ 'west': 120 }) as AuxiliaryChart;
   }
 
   public createSeismicWidget(pipeline: SeismicPipeline): SeismicWidget {
@@ -360,6 +309,19 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
         'location': ColorBarLocation.West,
         'maxheight': '80%',
         'alignment': Alignment.Top
+      },
+      'auxiliarychart': {
+        'size': 120,
+        'visible': false,
+        'title': {
+            'text': 'Auxiliary Chart',
+            'textstyle': {
+                'font': '16px Roboto',
+                'color': 'gray'
+            },
+            'size': 20
+        },
+        'charts': this._charts
       }
     })
       .setAnnotationSize({ 'west': 120 })
@@ -389,7 +351,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
   }
 
   public toggleTable(): SeismicComponent {
-    const isTableVisible = this.seismicWidget.getOptions()['table']['visible'] == true;
+    const isTableVisible = this.seismicWidget.getOptions()['table']['visible'] === true;
     this.seismicWidget.setOptions({
       'table': {
         'visible': !isTableVisible
@@ -412,7 +374,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     let headerField;
     for (let i = 0; i < axisHeaders.length; i++) {
       headerField = this.seismicWidget.getTraceHeader(axisHeaders[i]['name']);
-      if (activeHeaders.indexOf(axisHeaders[i]['name']) == -1) {
+      if (activeHeaders.indexOf(axisHeaders[i]['name']) === -1) {
         this.seismicWidget.setTraceHeaderVisible(headerField, true);
       }
       const headerInfo = this.seismicWidget.getTraceHeaderAxis(headerField);
@@ -455,7 +417,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
 
     const headersOptions = {
       'availableheaders': availableHeaders,
-      'auxiliary-headers': this.chartWidget.getChartOptions()['headers'],
+      'auxiliary-headers': this._charts,
       'axis-headers': axisHeaders
     };
 
@@ -464,16 +426,17 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       if (args == null) {
         return;
       }
-      if (args['auxiliary-headers'] != null) {
-        if (this.chartWidget.getVisible() === false && args['auxiliary-headers'].length > 0) {
-          this.toggleChartWidget(false);
-        }
-        this.chartWidget.setChartOptions(args['auxiliary-headers']);
-        const westAnnotationWidth = this.chartWidget.getAnnotation(AnnotationLocation.West).getDesiredWidth();
-        this.seismicWidget.setAnnotationSize({ 'west': westAnnotationWidth });
-      }
       if (args['axis-headers'] != null) {
         this.setActiveHeaders(args['axis-headers']);
+      }
+      if (args['auxiliary-headers']) {
+        this._charts = args['auxiliary-headers'];
+        this.seismicWidget.setOptions({
+          'auxiliarychart': {
+            'visible': this._charts.length > 0,
+            'charts': this._charts
+          }
+        });
       }
     };
 
