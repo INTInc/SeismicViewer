@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SeismicComponent } from './seismic.component';
 
@@ -6,10 +6,11 @@ describe('SeismicComponent', () => {
   let component: SeismicComponent;
   let fixture: ComponentFixture<SeismicComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ SeismicComponent ]
-    })
+    declarations: [SeismicComponent],
+    teardown: { destroyAfterEach: false }
+})
     .compileComponents();
   }));
 

@@ -1,9 +1,9 @@
-import { EventDispatcher } from "@int/geotoolkit/util/EventDispatcher";
+import { EventDispatcher } from '@int/geotoolkit/util/EventDispatcher';
 import { Input, Component, AfterViewInit, ViewChild, ElementRef, OnInit } from '@angular/core';
 
-import {WindowService, IDialog} from "../../window.service";
+import {WindowService, IDialog} from '../../window.service';
 
-let HeadersDialog_LAYOUT = {
+const HeadersDialog_LAYOUT = {
   custom: false,
   top: 250,
   left: 200
@@ -16,7 +16,7 @@ let HeadersDialog_LAYOUT = {
 })
 
 export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, AfterViewInit {
-  @ViewChild('headersGroup', { static: false }) headersGroup: ElementRef;
+  @ViewChild('headersGroup') headersGroup: ElementRef;
 
   @Input('left') left: number;
   @Input('top') top: number;
@@ -26,7 +26,7 @@ export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, A
   public _onMouseUp: any;
   public _onMouseMove: any;
 
-  public selectedTabIndex: number = 0;
+  public selectedTabIndex = 0;
   public auxiliaryHeaders: any;
   public axisHeaders: any;
 
@@ -49,9 +49,9 @@ export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, A
   }
 
   tabChange(event) {
-    //https://github.com/angular/material2/issues/5269
+    // https://github.com/angular/material2/issues/5269
     this.selectedTabIndex = event.index;
-    //Promise.resolve().then(() => this.selectedTabIndex = event.index);
+    // Promise.resolve().then(() => this.selectedTabIndex = event.index);
   }
 
   onMouseDown(event: MouseEvent) {
@@ -71,8 +71,8 @@ export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, A
     if (!this.draggingWindow) {
       return;
     }
-    let offsetX = event.screenX - this.px;
-    let offsetY = event.screenY - this.py;
+    const offsetX = event.screenX - this.px;
+    const offsetY = event.screenY - this.py;
     this.px = event.screenX;
     this.py = event.screenY;
 
@@ -103,32 +103,32 @@ export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, A
   }
 
   public getHeaders(allHeaders, activeHeaders) {
-    let availableHeaders = [];
+    const availableHeaders = [];
     const findHeaderByName = function (headerName) {
-      for(let headerKey in activeHeaders) {
+      for (const headerKey in activeHeaders) {
         if (activeHeaders.hasOwnProperty(headerKey)) {
-          let headerInfo = activeHeaders[headerKey];
-          if (headerKey == headerName) {
+          const headerInfo = activeHeaders[headerKey];
+          if (headerKey === headerName) {
             return headerInfo;
           }
         }
       }
       return null;
     };
-    for(let i = 0; i < allHeaders.length; i++) {
-      let headerFieldInfo = {
+    for (let i = 0; i < allHeaders.length; i++) {
+      const headerFieldInfo = {
         'id': allHeaders[i].getIdentifier(),
         'name' : allHeaders[i].getName(),
         'title': allHeaders[i].getTitle(),
         'isEnabled': false,
         'color': 'transparent'
       };
-      let headerInfo = findHeaderByName(allHeaders[i].getName());
+      const headerInfo = findHeaderByName(allHeaders[i].getName());
       if (headerInfo != null) {
         headerFieldInfo['color'] = headerInfo['color'];
         headerFieldInfo['isEnabled'] = true;
       }
-      availableHeaders.push(headerFieldInfo)
+      availableHeaders.push(headerFieldInfo);
     }
     return availableHeaders;
   }
@@ -142,9 +142,9 @@ export class HeadersDialog extends EventDispatcher implements IDialog, OnInit, A
 
   public getOptions() {
     const collectHeaders = function (headerOptions) {
-      let activeHeaders = [];
+      const activeHeaders = [];
       for (let i = 0; i < headerOptions.length; i++) {
-        let header = headerOptions[i];
+        const header = headerOptions[i];
         if (header['isEnabled'] === true) {
           activeHeaders.push(header);
         }

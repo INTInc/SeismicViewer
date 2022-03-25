@@ -1,40 +1,40 @@
-import "@int/geotoolkit/bootstrap/polyfill";
-import { init } from "@int/geotoolkit/base";
-import { EventDispatcher } from "@int/geotoolkit/util/EventDispatcher";
-import { SeismicPipeline } from "@int/geotoolkit/seismic/pipeline/SeismicPipeline";
-import { Plot } from "@int/geotoolkit/plot/Plot";
-import { SeismicWidget } from "@int/geotoolkit/seismic/widgets/SeismicWidget";
-import { ViewSynchronizer } from "@int/geotoolkit/widgets/sync/ViewSynchronizer";
-import { ToolsContainer } from "@int/geotoolkit/controls/tools/ToolsContainer";
-import { NormalizationType } from "@int/geotoolkit/seismic/pipeline/NormalizationType";
-import { Range } from "@int/geotoolkit/util/Range";
-import { SeismicColors } from "@int/geotoolkit/seismic/util/SeismicColors";
-import { AGC } from "@int/geotoolkit/seismic/pipeline/processor/AGC";
-import { Reverse } from "@int/geotoolkit/seismic/pipeline/processor/Reverse";
-import { RemoteSeismicDataSource } from "@int/geotoolkit/seismic/data/RemoteSeismicDataSource";
-import { Group } from "@int/geotoolkit/scene/Group";
+import '@int/geotoolkit/bootstrap/polyfill';
+import { init } from '@int/geotoolkit/base';
+import { EventDispatcher } from '@int/geotoolkit/util/EventDispatcher';
+import { SeismicPipeline } from '@int/geotoolkit/seismic/pipeline/SeismicPipeline';
+import { Plot } from '@int/geotoolkit/plot/Plot';
+import { SeismicWidget } from '@int/geotoolkit/seismic/widgets/SeismicWidget';
+import { ViewSynchronizer } from '@int/geotoolkit/widgets/sync/ViewSynchronizer';
+import { ToolsContainer } from '@int/geotoolkit/controls/tools/ToolsContainer';
+import { NormalizationType } from '@int/geotoolkit/seismic/pipeline/NormalizationType';
+import { Range } from '@int/geotoolkit/util/Range';
+import { SeismicColors } from '@int/geotoolkit/seismic/util/SeismicColors';
+import { AGC } from '@int/geotoolkit/seismic/pipeline/processor/AGC';
+import { Reverse } from '@int/geotoolkit/seismic/pipeline/processor/Reverse';
+import { RemoteSeismicDataSource } from '@int/geotoolkit/seismic/data/RemoteSeismicDataSource';
+import { Group } from '@int/geotoolkit/scene/Group';
 import {Events as NodeEvents} from '@int/geotoolkit/scene/Node';
-import { VerticalBoxLayout } from "@int/geotoolkit/layout/VerticalBoxLayout";
-import { Alignment } from "@int/geotoolkit/layout/BoxLayout";
-import { Text } from "@int/geotoolkit/scene/shapes/Text";
-import { Events as Events__geo__ } from "@int/geotoolkit/layout/Events";
-import { Events as Events__geo__0 } from "@int/geotoolkit/controls/tools/AbstractTool";
-import { SyncMode } from "@int/geotoolkit/widgets/sync/SyncMode";
-import { LineStyle } from "@int/geotoolkit/attributes/LineStyle";
-import { Point } from "@int/geotoolkit/util/Point";
-import { Events as Events__geo__1 } from "@int/geotoolkit/controls/tools/CrossHair";
-import { ColorBarLocation } from "@int/geotoolkit/controls/shapes/ColorBarLocation";
-import { TextStyle } from "@int/geotoolkit/attributes/TextStyle";
+import { VerticalBoxLayout } from '@int/geotoolkit/layout/VerticalBoxLayout';
+import { Alignment } from '@int/geotoolkit/layout/BoxLayout';
+import { Text } from '@int/geotoolkit/scene/shapes/Text';
+import { Events as Events__geo__ } from '@int/geotoolkit/layout/Events';
+import { Events as Events__geo__0 } from '@int/geotoolkit/controls/tools/AbstractTool';
+import { SyncMode } from '@int/geotoolkit/widgets/sync/SyncMode';
+import { LineStyle } from '@int/geotoolkit/attributes/LineStyle';
+import { Point } from '@int/geotoolkit/util/Point';
+import { Events as Events__geo__1 } from '@int/geotoolkit/controls/tools/CrossHair';
+import { ColorBarLocation } from '@int/geotoolkit/controls/shapes/ColorBarLocation';
+import { TextStyle } from '@int/geotoolkit/attributes/TextStyle';
 import {JSLoader as JSCompression} from '@int/geotoolkit/seismic/data/compression/JSLoader';
 import {WasmLoader as WasmCompression} from '@int/geotoolkit/seismic/data/compression/WasmLoader';
 import {JSLoader as JSFilters} from '@int/geotoolkit/seismic/analysis/filters/JSLoader';
 import {WasmLoader as WasmFilters} from '@int/geotoolkit/seismic/analysis/filters/WasmLoader';
 import { Component, AfterViewInit, ViewChild, ElementRef, HostListener, OnInit, Input } from '@angular/core';
 import { AuxiliaryChart } from './auxiliarychart';
-import { IWindow, WindowService } from "../window.service";
-import { SeismicProperties } from "./seismic.properties";
-import { HeadersDialog } from "./headers/headers.dialog";
-import { AnnotationLocation } from "@int/geotoolkit/layout/AnnotationLocation";
+import { IWindow, WindowService } from '../window.service';
+import { SeismicProperties } from './seismic.properties';
+import { HeadersDialog } from './headers/headers.dialog';
+import { AnnotationLocation } from '@int/geotoolkit/layout/AnnotationLocation';
 
 init({
   'imports': [
@@ -51,9 +51,9 @@ init({
   styleUrls: ['./seismic.component.css']
 })
 export class SeismicComponent extends EventDispatcher implements IWindow, OnInit, AfterViewInit {
-  @ViewChild('card', { static: false }) card: ElementRef;
-  @ViewChild('plot', { static: false }) canvas: ElementRef;
-  @ViewChild('plothost', { static: false }) plotHost: ElementRef;
+  @ViewChild('card') card: ElementRef;
+  @ViewChild('plot') canvas: ElementRef;
+  @ViewChild('plothost') plotHost: ElementRef;
   @Input('left') left: number;
   @Input('top') top: number;
   @Input('right') right: number;

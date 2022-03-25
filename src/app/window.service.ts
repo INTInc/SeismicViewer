@@ -5,11 +5,7 @@ import {
   ApplicationRef,
 } from '@angular/core';
 
-enum Events {
-  /**
-   * onClose
-   * @type {string}
-   */
+export enum Events {
   onClose = 'onClose'
 }
 
@@ -27,11 +23,6 @@ let WindowServiceInstance: WindowService = null;
 
 /*@Injectable()*/
 export class WindowService {
-  public _activeDialogRef;
-  public _seismicComponent;
-  public _onCloseDialog;
-  public _chartComponentsByType = {};
-  public _chartComponents = [];
 
   constructor(
     public componentFactoryResolver: ComponentFactoryResolver,
@@ -49,6 +40,11 @@ export class WindowService {
     }.bind(this);
   }
   static Events = Events;
+  public _activeDialogRef;
+  public _seismicComponent;
+  public _onCloseDialog;
+  public _chartComponentsByType = {};
+  public _chartComponents = [];
 
   static getInstance(): WindowService {
     return WindowServiceInstance;
@@ -111,7 +107,7 @@ export class WindowService {
 
   public findComponentByInstance (componentInstance) {
     for (let i = 0; i < this._chartComponents.length; i++) {
-      if (this._chartComponents[i].instance == componentInstance){
+      if (this._chartComponents[i].instance === componentInstance) {
         return this._chartComponents[i];
       }
     }
@@ -158,15 +154,5 @@ export class WindowService {
     document.body.appendChild(domElem);
 
     return componentRef;
-  }
-}
-
-module WindowService {
-  export interface Events {
-    /**
-     * onClose
-     * @type {string}
-     */
-    onClose: string;
   }
 }

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { SeismicComponent } from './seismic/seismic.component';
 
-import {WindowService} from "./window.service";
+import {WindowService} from './window.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +17,7 @@ import {WindowService} from "./window.service";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, AfterViewInit {
-  @ViewChild('container', { static: false }) container: ElementRef;
+  @ViewChild('container') container: ElementRef;
   @ViewChild(SeismicComponent, { static: true }) seismic: SeismicComponent;
   public _onCloseDialog: any;
 
