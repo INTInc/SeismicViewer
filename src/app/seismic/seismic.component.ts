@@ -28,6 +28,8 @@ import { Component, AfterViewInit, ViewChild, ElementRef, HostListener, OnInit, 
 import { IWindow, WindowService } from '../window.service';
 import { SeismicProperties } from './seismic.properties';
 import { HeadersDialog } from './headers/headers.dialog';
+import {TraceHeaderChartWidget} from '@int/geotoolkit/seismic/widgets/TraceHeaderChartWidget';
+import ChartOptions = TraceHeaderChartWidget.ChartOptions;
 
 init({
   'imports': [
@@ -83,13 +85,13 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
         },
         'plot': {
           'type': {
-            'Wiggle': false,
-            'InterpolatedDensity': true
+            'wiggle': false,
+            'interpolateddensity': true
           },
-          'decimationSpacing': 5
+          'decimationspacing': 5
         },
         'colors': {
-          'colorMap': SeismicColors.getDefault().createNamedColorMap('WhiteBlack', 256)
+          'colormap': SeismicColors.getDefault().createNamedColorMap('WhiteBlack', 256)
         }
       })
       .addTraceProcessor(new AGC({ 'apply': true, 'name': 'AGC' }))
@@ -202,29 +204,30 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const GraphHeight = 100;
     // Create a reader
     this.pipeline = SeismicComponent.createPipeline(reader);
-
+    const textOptions: Text.Options = {
+      'text': 'WG152D0002-00007A508-PSTM_RAW-FULL_STK-248666312.xgy',
+      'ax': 0.5,
+      'ay': 0.5,
+      'sizeisindevicespace': true,
+      'textstyle': {
+        'color': '#757575',
+        'font': '13px Roboto'
+      }
+    };
+    const text = new Text(textOptions).setLayoutStyle({
+      'height': 20
+    });
     this.plot = new Plot({
-      'canvasElement': this.canvas.nativeElement,
+      'canvaselement': this.canvas.nativeElement,
       'root': new Group()
         .setAutoModelLimitsMode(true)
         .setLayout(new VerticalBoxLayout(null, Alignment.Left))
         .addChild([
-          new Text({
-            'text': 'WG152D0002-00007A508-PSTM_RAW-FULL_STK-248666312.xgy',
-            'ax': 0.5,
-            'ay': 0.5,
-            'sizeIsInDeviceSpace': true,
-            'textStyle': {
-              'color': '#757575',
-              'font': '13px Roboto'
-            }
-          }).setLayoutStyle({
-            'height': 20
-          }),
+          text,
           // create seismic
           this.seismicWidget = this.createSeismicWidget(this.pipeline)
         ]),
-      'autoUpdate': true
+      'autoupdate': true
     });
     this.setActiveHeaders([{
       'name': 'CDP',
@@ -283,11 +286,12 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const isChartVisible = this.seismicWidget.getOptions()['auxiliarychart']['visible'] === true;
     const charts = this.seismicWidget.getOptions()['auxiliarychart']['charts'];
     if (charts.length === 0) {
-      charts.push({
+      const chartOptions: ChartOptions = {
         'visible': true,
         'name': 'CDP',
-        'linestyle': new LineStyle('#205193')
-      });
+        'linestyle': new LineStyle('#205193'),
+      };
+      charts.push(chartOptions);
     }
     this.seismicWidget.setOptions({
       'auxiliarychart': {
