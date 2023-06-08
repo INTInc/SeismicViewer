@@ -1,16 +1,16 @@
-import { EventDispatcher } from "@int/geotoolkit/util/EventDispatcher";
-import { SeismicColors } from "@int/geotoolkit/seismic/util/SeismicColors";
-import { NormalizationType } from "@int/geotoolkit/seismic/pipeline/NormalizationType";
-import { Range } from "@int/geotoolkit/util/Range";
+import { EventDispatcher } from '@int/geotoolkit/util/EventDispatcher';
+import { SeismicColors } from '@int/geotoolkit/seismic/util/SeismicColors';
+import { NormalizationType } from '@int/geotoolkit/seismic/pipeline/NormalizationType';
+import { Range } from '@int/geotoolkit/util/Range';
 import { Input, Component, AfterViewInit, OnInit } from '@angular/core';
 
-import {WindowService, IDialog} from "../window.service";
+import {WindowService, IDialog} from '../window.service';
 
 const round = function(number: number): number {
-  return Math.round(number * 100)/100;
+  return Math.round(number * 100) / 100;
 };
 
-let SeismicProperties_LAYOUT = {
+const SeismicProperties_LAYOUT = {
   custom: false,
   top: 250,
   left: 200
@@ -27,7 +27,7 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
   public inchesPerSecond: number;
   public interpolationType: number;
 
-  public normalizationType: number;
+  public normalizationType: NormalizationType;
   public scale: number;
   public minLimit: number;
   public maxLimit: number;
@@ -54,7 +54,7 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
   public _onMouseMove: any;
 
   public availableColorMaps: any;
-  public selectedTabIndex: number = 0;
+  public selectedTabIndex = 0;
   public processors = [];
 
   constructor() {
@@ -67,10 +67,10 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
     const colorProvider = SeismicColors.getDefault();
     const colorMaps = colorProvider.listNameColorMaps();
-    let availableColorMaps = [];
+    const availableColorMaps = [];
     for (let i = 0; i < colorMaps.length; i++) {
-      let colorMap = colorProvider.createNamedColorMap(colorMaps[i], 320);
-      let surface = colorMap.exportToImage(140, 10, false);
+      const colorMap = colorProvider.createNamedColorMap(colorMaps[i], 320);
+      const surface = colorMap.exportToImage(140, 10, false);
 
       availableColorMaps.push({
         name: colorMaps[i],
@@ -87,13 +87,13 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
   }
 
   tabChange(event) {
-    //https://github.com/angular/material2/issues/5269
+    // https://github.com/angular/material2/issues/5269
     this.selectedTabIndex = event.index;
-    //Promise.resolve().then(() => this.selectedTabIndex = event.index);
+    // Promise.resolve().then(() => this.selectedTabIndex = event.index);
   }
 
   isNormalizationLimits() {
-    return this.normalizationType == NormalizationType.Limits;
+    return this.normalizationType === NormalizationType.Limits;
   }
 
   onMouseDown(event: MouseEvent) {
@@ -113,8 +113,8 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
     if (!this.draggingWindow) {
       return;
     }
-    let offsetX = event.screenX - this.px;
-    let offsetY = event.screenY - this.py;
+    const offsetX = event.screenX - this.px;
+    const offsetY = event.screenY - this.py;
     this.px = event.screenX;
     this.py = event.screenY;
 
@@ -146,9 +146,9 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
   onColorMapChanged(event) {
     const colorProvider = SeismicColors.getDefault();
-    for(let i=0; i<this.availableColorMaps.length; i++){
-      let colorMap = this.availableColorMaps[i];
-      if (this.selectedColormap == colorMap.name){
+    for (let i = 0; i < this.availableColorMaps.length; i++) {
+      const colorMap = this.availableColorMaps[i];
+      if (this.selectedColormap === colorMap.name) {
 
         this.selectedColormap_URL = (colorProvider.createNamedColorMap(colorMap.name, 320)
           .exportToImage(155, 10, false) as any)
@@ -184,9 +184,9 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
     const selectedColorMap = options['colors']['colorMap'];
     const colorProvider = SeismicColors.getDefault();
-    for(let i=0; i<this.availableColorMaps.length; i++){
-      let colorMap = this.availableColorMaps[i];
-      if (selectedColorMap == colorMap.name){
+    for (let i = 0; i < this.availableColorMaps.length; i++) {
+      const colorMap = this.availableColorMaps[i];
+      if (selectedColorMap === colorMap.name) {
         this.selectedColormap = colorMap.name;
 
         this.selectedColormap_URL = (colorProvider.createNamedColorMap(colorMap.name, 320)
