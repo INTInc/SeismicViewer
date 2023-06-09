@@ -204,26 +204,24 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const GraphHeight = 100;
     // Create a reader
     this.pipeline = SeismicComponent.createPipeline(reader);
-    const textOptions: Text.Options = {
-      'text': 'WG152D0002-00007A508-PSTM_RAW-FULL_STK-248666312.xgy',
-      'ax': 0.5,
-      'ay': 0.5,
-      'sizeisindevicespace': true,
-      'textstyle': {
-        'color': '#757575',
-        'font': '13px Roboto'
-      }
-    };
-    const text = new Text(textOptions).setLayoutStyle({
-      'height': 20
-    });
     this.plot = new Plot({
       'canvaselement': this.canvas.nativeElement,
       'root': new Group()
         .setAutoModelLimitsMode(true)
         .setLayout(new VerticalBoxLayout(null, Alignment.Left))
         .addChild([
-          text,
+          new Text({
+            'text': 'WG152D0002-00007A508-PSTM_RAW-FULL_STK-248666312.xgy',
+            'ax': 0.5,
+            'ay': 0.5,
+            'sizeisindevicespace': true,
+            'textstyle': {
+              'color': '#757575',
+              'font': '13px Roboto'
+            }
+          }).setLayoutStyle({
+            'height': 20
+          }),
           // create seismic
           this.seismicWidget = this.createSeismicWidget(this.pipeline)
         ]),
@@ -286,12 +284,11 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     const isChartVisible = this.seismicWidget.getOptions()['auxiliarychart']['visible'] === true;
     const charts = this.seismicWidget.getOptions()['auxiliarychart']['charts'];
     if (charts.length === 0) {
-      const chartOptions: ChartOptions = {
+      charts.push({
         'visible': true,
         'name': 'CDP',
         'linestyle': new LineStyle('#205193'),
-      };
-      charts.push(chartOptions);
+      });
     }
     this.seismicWidget.setOptions({
       'auxiliarychart': {
