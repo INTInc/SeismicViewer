@@ -253,7 +253,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
     return this.pipeline;
   }
 
-  public initializeCrossHairCursor(seismicWidget) {
+  public initializeCrossHairCursor(seismicWidget: SeismicWidget) {
     // customize widget tools
     const lineStyle = new LineStyle({
       color: 'red',
@@ -267,15 +267,14 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       .setVerticalLineStyle(lineStyle)
       .setHorizontalLineStyle(null);
 
-    const onPositionChanged = function (sender, eventArgs) {
+    seismicCrossHair.on(CrossHairEvents.onPositionChanged, (event, sender, eventArgs) => {
       const position = eventArgs.getPosition().getX();
       if (isNaN(position)) {
         seismicCrossHair.setVisible(false);
         return;
       }
       seismicCrossHair.setVisible(true);
-    };
-    seismicCrossHair.addListener(CrossHairEvents.onPositionChanged, onPositionChanged);
+    });
   }
   public isChartVisible() {
     return this.seismicWidget && this.seismicWidget.getOptions()['auxiliarychart']['visible'] === true;
@@ -451,11 +450,11 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
   }
 
   public showProperties(): SeismicComponent {
-    this._onCloseDialog = (type, dialog, args) => {
+    this._onCloseDialog = (type, dialog, args: ReturnType<SeismicProperties['getOptions']>) => {
       dialog.off(WindowService.Events.onClose, this._onCloseDialog);
       if (args != null && args['options'] != null) {
         const seismicOptions = args['options'];
-        const scaleOptions = seismicOptions['scale'];
+        const scaleOptions = args['scale'];
 
         const pipeline = this.seismicWidget.getPipeline();
         const processors = args['processors'];
@@ -484,7 +483,7 @@ export class SeismicComponent extends EventDispatcher implements IWindow, OnInit
       }
     };
 
-    const seismicProperties = this._windowService.showDialog(SeismicProperties);
+    const seismicProperties: {instance: SeismicProperties} = this._windowService.showDialog(SeismicProperties);
     if (seismicProperties.instance) {
       const pipeline = this.seismicWidget.getPipeline();
       const seismicOptions = pipeline.getOptions();

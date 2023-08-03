@@ -5,6 +5,9 @@ import { Range } from '@int/geotoolkit/util/Range';
 import { Input, Component, AfterViewInit, OnInit } from '@angular/core';
 
 import {WindowService, IDialog} from '../window.service';
+import { SeismicPipeline } from '@int/geotoolkit/seismic/pipeline/SeismicPipeline';
+import { InterpolationType } from '@int/geotoolkit/seismic/pipeline/InterpolationType';
+import { SeismicImage } from '@int/geotoolkit/seismic/image/SeismicImage';
 
 const round = function(number: number): number {
   return Math.round(number * 100) / 100;
@@ -25,12 +28,12 @@ const SeismicProperties_LAYOUT = {
 export class SeismicProperties extends EventDispatcher implements IDialog, OnInit, AfterViewInit {
   public tracesPerInch: number;
   public inchesPerSecond: number;
-  public interpolationType: number;
+  public interpolationType: InterpolationType;
 
   public normalizationType: NormalizationType;
   public scale: number;
-  public minLimit: number;
-  public maxLimit: number;
+  public minLimit: string;
+  public maxLimit: string;
 
   public isWiggle: boolean;
   public isNegativeFill: boolean;
@@ -55,7 +58,11 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
   public availableColorMaps: any;
   public selectedTabIndex = 0;
-  public processors = [];
+  public processors: {
+    name: string,
+    description: string,
+    isEnabled: boolean
+  }[] = [];
 
   constructor() {
     super();
@@ -74,7 +81,7 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
       availableColorMaps.push({
         name: colorMaps[i],
-        URL: (surface as any).getCanvas().toDataURL()
+        URL: surface.getBase64()
       });
     }
     this.availableColorMaps = availableColorMaps;
@@ -159,7 +166,21 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
     }
   }
 
-  public setOptions(options) {
+  public setOptions(options: {
+    processors: {
+      name: string,
+      description: string,
+      isEnabled: boolean
+    }[],
+    normalization: SeismicPipeline.Options['normalization'],
+    interpolation: SeismicPipeline.Options['interpolation'],
+    scale: {
+      tracescale: SeismicImage.ScaleOptions['tracescale'],
+      samplescale: SeismicImage.ScaleOptions['samplescale']
+    },
+    colors: SeismicPipeline.Options['colors'],
+    plot: SeismicPipeline.Options['plot']
+  }) {
     this.processors = options['processors'];
 
     this.tracesPerInch = round(options['scale']['tracescale']);
@@ -168,68 +189,73 @@ export class SeismicProperties extends EventDispatcher implements IDialog, OnIni
 
     this.normalizationType =  options['normalization']['type'];
     this.scale = options['normalization']['scale'];
-    this.minLimit = options['normalization']['limits'].getLow().toFixed(2);
-    this.maxLimit = options['normalization']['limits'].getHigh().toFixed(2);
+    this.minLimit = (options['normalization']['limits'] as Range).getLow().toFixed(2);
+    this.maxLimit = (options['normalization']['limits'] as Range).getHigh().toFixed(2);
 
-    this.isWiggle = options['plot']['type']['Wiggle'];
-    this.isNegativeFill = options['plot']['type']['NegativeFill'];
-    this.isPositiveFill = options['plot']['type']['PositiveFill'];
-    this.isNegativeColorFill = options['plot']['type']['NegativeColorFill'];
-    this.isPositiveColorFill = options['plot']['type']['PositiveColorFill'];
-    this.isSimpleDensity = options['plot']['type']['SimpleDensity'];
-    this.isInterpolatedDensity = options['plot']['type']['InterpolatedDensity'];
+    this.isWiggle = options['plot']['type']['wiggle'];
+    this.isNegativeFill = options['plot']['type']['negativefill'];
+    this.isPositiveFill = options['plot']['type']['positivefill'];
+    this.isNegativeColorFill = options['plot']['type']['negativecolorfill'];
+    this.isPositiveColorFill = options['plot']['type']['positivecolorfill'];
+    this.isSimpleDensity = options['plot']['type']['simpledensity'];
+    this.isInterpolatedDensity = options['plot']['type']['interpolateddensity'];
 
-    this.clippingFactor = options['plot']['clippingFactor'];
-    this.decimationSpacing = options['plot']['decimationSpacing'];
+    this.clippingFactor = options['plot']['clippingfactor'];
+    this.decimationSpacing = options['plot']['decimationspacing'];
 
-    const selectedColorMap = options['colors']['colorMap'];
+    const selectedColorMap = options['colors']['colormap'];
     const colorProvider = SeismicColors.getDefault();
     for (let i = 0; i < this.availableColorMaps.length; i++) {
       const colorMap = this.availableColorMaps[i];
       if (selectedColorMap === colorMap.name) {
         this.selectedColormap = colorMap.name;
 
-        this.selectedColormap_URL = (colorProvider.createNamedColorMap(colorMap.name, 320)
-          .exportToImage(155, 10, false) as any)
-          .getCanvas()
-          .toDataURL();
+        this.selectedColormap_URL = colorProvider.createNamedColorMap(colorMap.name, 320)
+          .exportToImage(155, 10, false)
+          .getBase64();
         break;
       }
     }
     return this;
   }
 
-  public getOptions() {
+  public getOptions(): {processors: {
+    name: string,
+    description: string,
+    isEnabled: boolean
+  }[], scale: SeismicImage.ScaleOptions, options: SeismicPipeline.Options} {
     return {
       'processors': this.processors,
+      'scale': {
+        'tracescale': round(Number(this.tracesPerInch)),
+        'samplescale': round(Number(this.inchesPerSecond))
+      },
       'options': {
         'interpolation': {
-          'type': this.interpolationType
+          'traces': {
+            'type': this.interpolationType
+          }
         },
         'normalization': {
           'type': this.normalizationType,
           'scale': Number(this.scale),
           'limits': new Range(Number(this.minLimit), Number(this.maxLimit))
         },
-        'scale': {
-          'tracescale': round(Number(this.tracesPerInch)),
-          'samplescale': round(Number(this.inchesPerSecond))
-        },
         'plot': {
-          'clippingFactor': Number(this.clippingFactor),
-          'decimationSpacing': Number(this.decimationSpacing),
+          'clippingfactor': Number(this.clippingFactor),
+          'decimationspacing': Number(this.decimationSpacing),
           'type': {
-            'Wiggle': this.isWiggle,
-            'NegativeFill': this.isNegativeFill,
-            'PositiveFill': this.isPositiveFill,
-            'NegativeColorFill': this.isNegativeColorFill,
-            'PositiveColorFill': this.isPositiveColorFill,
-            'SimpleDensity': this.isSimpleDensity,
-            'InterpolatedDensity': this.isInterpolatedDensity
+            'wiggle': this.isWiggle,
+            'negativefill': this.isNegativeFill,
+            'positivefill': this.isPositiveFill,
+            'negativecolorfill': this.isNegativeColorFill,
+            'positivecolorfill': this.isPositiveColorFill,
+            'simpledensity': this.isSimpleDensity,
+            'interpolateddensity': this.isInterpolatedDensity
           }
         },
         'colors': {
-          'colorMap': this.selectedColormap
+          'colormap': this.selectedColormap
         }
       }
     };
